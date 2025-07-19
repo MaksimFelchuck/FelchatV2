@@ -24,7 +24,7 @@ class Settings:
         # Chat settings
         self.max_message_length = int(os.getenv("MAX_MESSAGE_LENGTH", "1000"))
         self.chat_history_limit = int(os.getenv("CHAT_HISTORY_LIMIT", "50"))
-        self.message_retention_days = int(os.getenv("MESSAGE_RETENTION_DAYS", "30"))
+        self.message_retention_minutes = int(os.getenv("MESSAGE_RETENTION_MINUTES", "30"))
         
         # Security settings
         self.session_cookie_name = os.getenv("SESSION_COOKIE_NAME", "user_id")

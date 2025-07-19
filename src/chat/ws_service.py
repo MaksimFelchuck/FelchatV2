@@ -108,7 +108,7 @@ class ChatWebSocketService:
         return False
     
     async def _save_message_to_redis(self, message: str, to_user_id: int, from_user_id: int) -> None:
-        """Save message to Redis for chat history."""
+        """Save message to Redis for chat history with 30-minute expiration."""
         if not self.redis:
             return
             
@@ -120,7 +120,12 @@ class ChatWebSocketService:
             "timestamp": int(time.time())
         }
         
+        # Save message to Redis list
         await self.redis.rpush(chat_key, json.dumps(message_data))
+        
+        # Set expiration based on config (default 30 minutes)
+        expiration_seconds = settings.message_retention_minutes * 60
+        await self.redis.expire(chat_key, expiration_seconds)
     
     def _get_chat_key(self, user1_id: int, user2_id: int) -> str:
         """Generate consistent Redis key for chat between two users."""
@@ -191,8 +196,71 @@ class ChatWebSocketService:
         chat_key = self._get_chat_key(user1_id, user2_id)
         
         try:
+            # Check if key exists (hasn't expired)
+            exists = await self.redis.exists(chat_key)
+            if not exists:
+                self._logger.info(f"Chat history expired for {user1_id}-{user2_id}")
+                return []
+            
             messages = await self.redis.lrange(chat_key, -limit, -1)
-            return [json.loads(message) for message in messages]
+            parsed_messages = []
+            
+            for message in messages:
+                try:
+                    parsed_messages.append(json.loads(message))
+                except json.JSONDecodeError as e:
+                    self._logger.warning(f"Failed to parse message: {e}")
+                    continue
+            
+                    self._logger.info(f"Retrieved {len(parsed_messages)} messages for {user1_id}-{user2_id}")
+            return parsed_messages
+            
         except Exception as e:
             self._logger.error(f"Error getting chat history for {user1_id}-{user2_id}: {e}")
-            return [] 
+            return []
+    
+    async def get_message_count(self, user1_id: int, user2_id: int) -> int:
+        """
+        Get the number of messages in chat history.
+        
+        Args:
+            user1_id: ID of the first user
+            user2_id: ID of the second user
+            
+        Returns:
+            Number of messages in chat
+        """
+        if not self.redis:
+            return 0
+            
+        chat_key = self._get_chat_key(user1_id, user2_id)
+        
+        try:
+            return await self.redis.llen(chat_key)
+        except Exception as e:
+            self._logger.error(f"Error getting message count for {user1_id}-{user2_id}: {e}")
+            return 0
+    
+    async def clear_chat_history(self, user1_id: int, user2_id: int) -> bool:
+        """
+        Clear chat history between two users.
+        
+        Args:
+            user1_id: ID of the first user
+            user2_id: ID of the second user
+            
+        Returns:
+            True if cleared successfully, False otherwise
+        """
+        if not self.redis:
+            return False
+            
+        chat_key = self._get_chat_key(user1_id, user2_id)
+        
+        try:
+            await self.redis.delete(chat_key)
+            self._logger.info(f"Chat history cleared for {user1_id}-{user2_id}")
+            return True
+        except Exception as e:
+            self._logger.error(f"Error clearing chat history for {user1_id}-{user2_id}: {e}")
+            return False 
