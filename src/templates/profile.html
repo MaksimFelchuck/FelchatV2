@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<h2>Профиль</h2>
+<ul class="list-group">
+  <li class="list-group-item"><b>ID:</b> {{ user.id }}</li>
+  <li class="list-group-item"><b>Имя:</b> {{ user.username }}</li>
+  <li class="list-group-item"><b>Email:</b> {{ user.email }}</li>
+</ul>
+{% endblock %} 

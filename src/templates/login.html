@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div class="login-page mx-auto" style="max-width: 400px; padding-top: 3rem;">
+  <h2 class="mb-4 display-6 fw-bold text-center">Вход</h2>
+  <form method="post" action="/users/login" class="p-4 rounded-4 shadow bg-dark-subtle border border-2 border-primary-subtle">
+    <div class="mb-3">
+      <label for="username" class="form-label">Имя пользователя</label>
+      <input type="text" class="form-control" id="username" name="username" required>
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">Пароль</label>
+      <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-primary w-100 py-2 fs-5">Войти</button>
+  </form>
+  <div class="text-center mt-3">
+    <span class="text-secondary">Нет аккаунта?</span>
+    <a href="/users/register" class="text-info text-decoration-none ms-1">Зарегистрироваться</a>
+  </div>
+</div>
+{% endblock %} 

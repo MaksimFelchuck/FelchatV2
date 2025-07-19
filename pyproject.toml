@@ -1,0 +1,12 @@
+[tool.black]
+line-length = 88
+skip-string-normalization = false
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "B"]
+ignore = []
+exclude = [".git", "__pycache__", "build", "dist", ".venv"]
+
+[tool.ruff.isort]
+known-first-party = ["app"] 

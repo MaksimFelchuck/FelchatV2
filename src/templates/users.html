@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Пользователи{% endblock %}
+{% block content %}
+<div class="users-page">
+  <h2 class="mb-4 display-5 fw-bold">Пользователи</h2>
+  <table class="table table-dark table-striped table-hover align-middle fs-5 rounded-3 overflow-hidden shadow">
+    <thead>
+      <tr>
+        <th>Имя</th>
+        <th>Email</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td class="fw-semibold">{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td style="min-width:220px;">
+          {% if user.id != current_user.id %}
+            <div class="d-flex align-items-center gap-2">
+              <a href="/chat/{{ user.id }}" class="btn btn-lg btn-primary flex-grow-1 chat-btn">Перейти в чат</a>
+              {% if user.id in blocked_ids %}
+                <form method="post" action="/users/unblock/{{ current_user.id }}/{{ user.id }}">
+                  <button class="btn btn-warning btn-sm block-btn">Разблокировать</button>
+                </form>
+              {% else %}
+                <form method="post" action="/users/block/{{ current_user.id }}/{{ user.id }}">
+                  <button class="btn btn-danger btn-sm block-btn">Заблокировать</button>
+                </form>
+              {% endif %}
+            </div>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %} 
