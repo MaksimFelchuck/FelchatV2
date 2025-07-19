@@ -1,37 +1,39 @@
 """Main entry point for the FastAPI application."""
 
 from fastapi import FastAPI, Request
-import os
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+
+from src.config import settings
 from src.di.container import Container
+from src.logger import app_logger
 from src.users.api import api_router as users_api_router
 from src.web.chat import router as chat_router
 from src.web.users import router as web_users_router
 
 container = Container()
-container.config.env.from_env("ENV", default="prod")
+container.config.env.from_env("ENV", default=settings.env)
 
-app = FastAPI()
+app = FastAPI(title="Felchat", version="1.0.0")
 
 # Export container for other modules
 __all__ = ["container", "app"]
 
-
-app.mount(
-    "/static", 
-    StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), 
-    name="static"
-)
+# Mount static files
+static_dir = Path(__file__).parent / "static"
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 @app.get("/")
 def root(request: Request):
     """Redirect to appropriate page based on authentication status."""
-    user_id = request.cookies.get("user_id")
+    user_id = request.cookies.get(settings.session_cookie_name)
     if user_id:
+        app_logger.info(f"Authenticated user {user_id} accessing root")
         return RedirectResponse("/users/")
-    else:
-        return RedirectResponse("/users/login")
+    
+    app_logger.info("Unauthenticated user accessing root, redirecting to login")
+    return RedirectResponse("/users/login")
 
 @app.get("/ping")
 def ping():

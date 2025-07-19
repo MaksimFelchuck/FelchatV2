@@ -1,8 +1,6 @@
-version: '3.9'
-
 services:
   app:
-    build: .
+    image: felchatv2-app:latest
     container_name: felchat_app
     working_dir: /app
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
@@ -21,6 +19,8 @@ services:
       - redis
     ports:
       - "8000:8000"
+    networks:
+      - felchat_network
 
   db:
     image: postgres:16
@@ -34,6 +34,8 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - felchat_network
 
   redis:
     image: redis:7
@@ -43,7 +45,13 @@ services:
       - "6379:6379"
     volumes:
       - redisdata:/data
+    networks:
+      - felchat_network
 
 volumes:
   pgdata:
-  redisdata: 
+  redisdata:
+
+networks:
+  felchat_network:
+    driver: bridge 

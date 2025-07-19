@@ -1,5 +1,6 @@
 fastapi
-uvicorn
+uvicorn[standard]
+websockets
 sqlalchemy
 alembic
 redis>=4.2.0

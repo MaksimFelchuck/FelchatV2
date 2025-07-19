@@ -1,12 +1,11 @@
 """Dependency injection container for the application."""
 
-import os
-
 from dependency_injector import containers, providers
 
 from src.chat.repositories.db.chat import ChatRepositoryDB
 from src.chat.repositories.inmem.chat import ChatRepositoryInMemory
 from src.chat.ws_service import ChatWebSocketService
+from src.config import settings
 from src.users.repositories.user_repo_db import UserRepositoryDB
 from src.db.session import SessionLocal
 
@@ -24,14 +23,12 @@ class Container(containers.DeclarativeContainer):
     
     chat_repository = providers.Selector(
         config.env,
-        prod=providers.Singleton(
-            ChatRepositoryDB, 
-            redis_url=os.getenv("REDIS_URL", "redis://localhost:6379/0")
-        ),
+        prod=providers.Singleton(ChatRepositoryDB, redis_url=settings.redis_url),
         test=providers.Singleton(ChatRepositoryInMemory),
     )
     
     chat_service = providers.Singleton(
         ChatWebSocketService, 
-        redis_url=os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        redis_url=settings.redis_url,
+        user_service=user_repository
     )
