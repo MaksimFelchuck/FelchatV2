@@ -1,8 +1,8 @@
 """Abstract base class for user repository implementations."""
 
 from abc import ABC, abstractmethod
+from typing import Any
 
-from src.users.models import User
 from src.users.schemas import UserCreate
 
 
@@ -10,7 +10,7 @@ class AbstractUserRepository(ABC):
     """Abstract base class for user repositories."""
     
     @abstractmethod
-    def create_user(self, user_data: UserCreate) -> User | None:
+    def create_user(self, user_data: UserCreate) -> Any | None:
         """
         Create a new user.
         
@@ -23,7 +23,7 @@ class AbstractUserRepository(ABC):
         pass
 
     @abstractmethod
-    def get_user_by_id(self, user_id: int) -> User | None:
+    def get_user_by_id(self, user_id: int) -> Any | None:
         """
         Get user by ID.
         
@@ -36,7 +36,7 @@ class AbstractUserRepository(ABC):
         pass
 
     @abstractmethod
-    def get_user_by_username(self, username: str) -> User | None:
+    def get_user_by_username(self, username: str) -> Any | None:
         """
         Get user by username.
         
@@ -49,7 +49,7 @@ class AbstractUserRepository(ABC):
         pass
 
     @abstractmethod
-    def get_user_by_email(self, email: str) -> User | None:
+    def get_user_by_email(self, email: str) -> Any | None:
         """
         Get user by email.
         
@@ -62,7 +62,7 @@ class AbstractUserRepository(ABC):
         pass
 
     @abstractmethod
-    def list_users(self) -> list[User]:
+    def list_users(self) -> list[Any]:
         """
         Get list of all users.
         
@@ -104,5 +104,19 @@ class AbstractUserRepository(ABC):
             
         Returns:
             True if either user has blocked the other
+        """
+        pass
+
+    @abstractmethod
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        """
+        Verify password against hash.
+        
+        Args:
+            plain_password: Plain text password
+            hashed_password: Hashed password from database
+            
+        Returns:
+            True if password matches
         """
         pass

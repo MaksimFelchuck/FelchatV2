@@ -1,7 +1,5 @@
 """User service for business logic operations."""
 
-from passlib.hash import bcrypt
-
 from src.users.repositories.abs.user import AbstractUserRepository
 from src.users.schemas import UserCreate, UserRead
 
@@ -28,13 +26,8 @@ class UserService:
         Returns:
             Created user or None if registration failed
         """
-        hashed = bcrypt.hash(user_data.password)
-        user = UserCreate(
-            username=user_data.username,
-            email=user_data.email,
-            password=hashed,
-        )
-        created = self.repo.create_user(user)
+        # Репозиторий сам хэширует пароль
+        created = self.repo.create_user(user_data)
         if created is None:
             return None
         return UserRead.model_validate(created)
@@ -109,7 +102,12 @@ class UserService:
         if not user:
             return None
 
-        if not bcrypt.verify(password, user.password_hash):
+        # Используем метод репозитория для проверки пароля
+        password_hash = getattr(user, 'password_hash', None) or getattr(user, 'hashed_password', None)
+        if not password_hash:
+            return None
+
+        if not self.repo.verify_password(password, password_hash):
             return None
 
         return UserRead.model_validate(user)

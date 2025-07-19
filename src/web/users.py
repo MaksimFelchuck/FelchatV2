@@ -4,24 +4,20 @@ from fastapi import APIRouter, Depends, Form, Request, Response, status
 from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 
-from src.di.container import Container
+from src.dependencies import get_user_service
 from src.templates_engine import templates
 from src.users.schemas import UserRead
 from src.users.services import UserService
 
 router = APIRouter()
 
-# Create container instance for this module
-container = Container()
-container.config.env.from_env("ENV", default="prod")
-user_service = UserService(repo=container.user_repository())
-
-def get_current_user(request: Request):
+def get_current_user(request: Request, user_service: UserService = Depends(get_user_service)):
     """
     Get current user from cookie. Returns None if not authenticated.
     
     Args:
         request: FastAPI request object
+        user_service: User service dependency
         
     Returns:
         User object or None if not authenticated
@@ -41,10 +37,12 @@ def register(
     request: Request, 
     username: str = Form(...), 
     email: str = Form(...), 
-    password: str = Form(...)
+    password: str = Form(...),
+    user_service: UserService = Depends(get_user_service)
 ):
     """Handle registration form submission."""
     from src.users.schemas import UserCreate
+    
     try:
         user_data = UserCreate(username=username, email=email, password=password)
     except ValidationError:
@@ -79,7 +77,8 @@ def login(
     request: Request, 
     response: Response, 
     username: str = Form(...), 
-    password: str = Form(...)
+    password: str = Form(...),
+    user_service: UserService = Depends(get_user_service)
 ):
     """Handle login form submission."""
     user_obj = user_service.login(username, password)
@@ -100,10 +99,15 @@ def logout(response: Response):
     return response
 
 @router.get("/users/")
-def users_page(request: Request, current_user: UserRead = Depends(get_current_user)):
+def users_page(
+    request: Request, 
+    current_user: UserRead = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service)
+):
     """Render user list page."""
     if not current_user:
         return RedirectResponse("/users/login")
+    
     users = user_service.list_users()
     blocked_ids = [
         u.id for u in users if user_service.is_blocked(current_user.id, u.id)

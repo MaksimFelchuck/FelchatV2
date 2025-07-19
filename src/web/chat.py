@@ -4,13 +4,9 @@ from fastapi import APIRouter, Depends, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import RedirectResponse
 
 from src.chat.ws_service import ChatWebSocketService
-from src.di.container import Container
+from src.dependencies import get_chat_service, get_user_service
 from src.templates_engine import templates
 from src.users.services import UserService
-
-# Create container instance for this module
-container = Container()
-container.config.env.from_env("ENV", default="prod")
 
 router = APIRouter()
 
@@ -28,14 +24,6 @@ def get_current_user(request: Request):
     if not user_id:
         return None
     return int(user_id)
-
-def get_user_service() -> UserService:
-    """Dependency to get UserService from DI container."""
-    return UserService(repo=container.user_repository())
-
-def get_chat_service() -> ChatWebSocketService:
-    """Dependency to get ChatWebSocketService from DI container."""
-    return container.chat_service()
 
 @router.get("/chat/{other_user_id}")
 async def chat_page(
