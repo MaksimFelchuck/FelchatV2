@@ -38,8 +38,9 @@ class Settings:
         self.session_cookie_httponly = (
             os.getenv("SESSION_COOKIE_HTTPONLY", "true").lower() == "true"
         )
+        # В продакшене включаем secure cookies по умолчанию
         self.session_cookie_secure = (
-            os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
+            os.getenv("SESSION_COOKIE_SECURE", "true").lower() == "true"
         )
 
         # Logging settings
@@ -51,7 +52,8 @@ class Settings:
         # Server settings
         self.host = os.getenv("HOST", "0.0.0.0")
         self.port = int(os.getenv("PORT", "8000"))
-        self.reload = os.getenv("RELOAD", "true").lower() == "true"
+        # В продакшене отключаем reload
+        self.reload = os.getenv("RELOAD", "false").lower() == "true"
 
 
 # Global settings instance
