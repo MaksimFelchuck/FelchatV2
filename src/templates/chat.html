@@ -1,158 +1,105 @@
 {% extends "base.html" %}
-{% block title %}Чат{% endblock %}
+
+{% block title %}Чат с {{ other_username }} - Felchat{% endblock %}
+
 {% block content %}
-<div class="chat-page mx-auto" style="max-width: 800px; width:100%;">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="display-6 fw-bold mb-0">Чат с {{ other_username }}</h2>
-    <div class="d-flex align-items-center gap-2">
-      <span id="connection-status" class="badge bg-secondary">Подключение...</span>
-      <span class="badge bg-info">Сообщения живут 30 минут</span>
-      <a href="/users" class="btn btn-outline-primary btn-sm">← К пользователям</a>
+
+
+<!-- Current user ID for JavaScript -->
+<div id="current-user-data" data-user-id="{{ current_user_id }}" style="display: none;"></div>
+<div class="chat-container">
+    <!-- Users Sidebar -->
+    <div class="users-sidebar">
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-primary); font-weight: 600;">
+            <i class="fas fa-users"></i> Пользователи
+        </h3>
+        
+        <div id="users-list">
+            {% for user in users %}
+            {% if user.id != current_user_id %}
+            <div class="user-item" data-user-id="{{ user.id }}" data-username="{{ user.username }}">
+                <div class="user-avatar">
+                    {{ user.username[0].upper() }}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">{{ user.username }}</div>
+                    <div class="user-status">
+                        {% if user.id in online_users %}
+                            <span class="status-online">Онлайн</span>
+                        {% else %}
+                            <span class="status-offline">Оффлайн</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
     </div>
-  </div>
-  
-  <div id="chat-history" class="mb-3 p-3 rounded-3 bg-dark-subtle border border-primary-subtle" style="height: 400px; overflow-y: auto;">
-    {% if is_blocked %}
-      <div class="mb-3">
-        <div class="d-flex justify-content-center">
-          <div class="p-3 rounded-3 bg-warning text-dark">
-            <i class="fas fa-ban"></i> 
-            <strong>Внимание!</strong> Вы заблокированы этим пользователем или заблокировали его. 
-            Сообщения не будут доставлены.
-          </div>
-        </div>
-      </div>
-    {% endif %}
-    
-    {% for msg in history %}
-      <div class="mb-3">
-        <div class="d-flex {% if msg.from == current_user %}justify-content-end{% endif %}">
-          <div class="{% if msg.from == current_user %}text-end{% endif %}" style="max-width: 70%;">
-            <div class="fw-bold text-muted small mb-1">
-              {% if msg.from == current_user %}{{ username }}{% else %}{{ other_username }}{% endif %}
+
+    <!-- Chat Main -->
+    <div class="chat-main">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="chat-title">
+                <i class="fas fa-comment"></i> Чат с {{ other_username }}
             </div>
-            <div class="p-2 rounded-3 {% if msg.from == current_user %}bg-primary text-white{% else %}bg-light text-dark{% endif %}">
-              {{ msg.message }}
+            <div class="chat-status" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; gap: 0.5rem;">
+                    <span id="connection-status" class="status-badge status-connecting">Подключение...</span>
+                    <span class="status-badge" style="background: var(--secondary-gradient);">
+                        <i class="fas fa-clock"></i> 30 мин
+                    </span>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                                    {% if is_blocked %}
+                    <button class="status-badge unblock-btn" data-user-id="{{ other_user_id }}">
+                        <i class="fas fa-unlock"></i> РАЗБЛОКИРОВАТЬ
+                    </button>
+                {% else %}
+                    <button class="status-badge block-btn" data-user-id="{{ other_user_id }}">
+                        <i class="fas fa-ban"></i> ЗАБЛОКИРОВАТЬ
+                    </button>
+                {% endif %}
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
-  
-  <form id="chat-form" class="d-flex gap-2">
-    <input id="chat-input" class="form-control" autocomplete="off" placeholder="Введите сообщение..." />
-    <button class="btn btn-primary" type="submit" id="send-btn">Отправить</button>
-  </form>
+
+        <!-- Messages Area -->
+        <div id="messages" class="chat-messages">
+            <!-- Messages will be loaded here -->
+            <div style="text-align: center; color: var(--text-secondary); margin: 2rem 0;">
+                <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>Начните разговор с {{ other_username }}</p>
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input">
+            {% if is_blocked %}
+                <div class="blocked-input" style="background: rgba(220, 53, 69, 0.1); border: 1px solid #dc3545; border-radius: 8px; padding: 1rem; text-align: center; color: #dc3545;">
+                    <i class="fas fa-ban" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">Чат заблокирован</div>
+                    <div style="font-size: 0.9rem;">Вы не можете отправлять сообщения этому пользователю</div>
+                </div>
+            {% else %}
+                <div class="input-group">
+                    <textarea 
+                        id="message-input" 
+                        class="message-input" 
+                        placeholder="Введите сообщение..."
+                        rows="1"
+                    ></textarea>
+                    <button id="send-btn" class="send-btn">
+                        Отправить <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
-<script>
-  const userId = {{ current_user }};
-  const username = "{{ username }}";
-  const otherUserId = {{ other_user_id }};
-  const otherUsername = "{{ other_username }}";
-  const isBlocked = {{ 'true' if is_blocked else 'false' }};
-  const chatHistory = document.getElementById('chat-history');
-  const connectionStatus = document.getElementById('connection-status');
-  const sendBtn = document.getElementById('send-btn');
-  const chatInput = document.getElementById('chat-input');
-  
-  // Connect to WebSocket with user_id as query parameter
-  const ws = new WebSocket(`ws://${location.host}/ws/chat/${otherUserId}?user_id=${userId}`);
-  
-  ws.onopen = function() {
-    connectionStatus.textContent = 'Подключено';
-    connectionStatus.className = 'badge bg-success';
-    sendBtn.disabled = false;
-    chatInput.disabled = false;
-  };
-  
-  ws.onclose = function() {
-    connectionStatus.textContent = 'Отключено';
-    connectionStatus.className = 'badge bg-danger';
-    sendBtn.disabled = true;
-    chatInput.disabled = true;
-  };
-  
-  ws.onerror = function() {
-    connectionStatus.textContent = 'Ошибка';
-    connectionStatus.className = 'badge bg-danger';
-  };
-  
-  ws.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    
-    // Handle error messages
-    if (data.error) {
-      const errorDiv = document.createElement('div');
-      errorDiv.classList.add('mb-3');
-      errorDiv.innerHTML = `
-        <div class="d-flex justify-content-center">
-          <div class="p-2 rounded-3 bg-danger text-white">
-            <i class="fas fa-exclamation-triangle"></i> ${data.message}
-          </div>
-        </div>
-      `;
-      chatHistory.appendChild(errorDiv);
-      chatHistory.scrollTop = chatHistory.scrollHeight;
-      return;
-    }
-    
-    const div = document.createElement('div');
-    div.classList.add('mb-3');
-    
-    const isOwnMessage = data.from == userId;
-    const senderName = isOwnMessage ? username : otherUsername;
-    
-    div.innerHTML = `
-      <div class="d-flex ${isOwnMessage ? 'justify-content-end' : ''}">
-        <div class="${isOwnMessage ? 'text-end' : ''}" style="max-width: 70%;">
-          <div class="fw-bold text-muted small mb-1">${senderName}</div>
-          <div class="p-2 rounded-3 ${isOwnMessage ? 'bg-primary text-white' : 'bg-light text-dark'}">
-            ${data.message}
-          </div>
-        </div>
-      </div>
-    `;
-    
-    chatHistory.appendChild(div);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
-  };
-  
-  document.getElementById('chat-form').onsubmit = function(e) {
-    e.preventDefault();
-    const message = chatInput.value.trim();
-    if (message && ws.readyState === WebSocket.OPEN && !isBlocked) {
-      ws.send(message);
-      chatInput.value = '';
-    } else if (isBlocked) {
-      // Show error message for blocked users
-      const errorDiv = document.createElement('div');
-      errorDiv.classList.add('mb-3');
-      errorDiv.innerHTML = `
-        <div class="d-flex justify-content-center">
-          <div class="p-2 rounded-3 bg-danger text-white">
-            <i class="fas fa-ban"></i> Нельзя отправить сообщение заблокированному пользователю
-          </div>
-        </div>
-      `;
-      chatHistory.appendChild(errorDiv);
-      chatHistory.scrollTop = chatHistory.scrollHeight;
-      chatInput.value = '';
-    }
-  };
-  
-  // Disable input if blocked
-  if (isBlocked) {
-    chatInput.disabled = true;
-    sendBtn.disabled = true;
-    chatInput.placeholder = "Сообщения заблокированы";
-  }
-  
-  // Auto-focus on input
-  chatInput.focus();
-  
-  // Scroll to bottom on load
-  chatHistory.scrollTop = chatHistory.scrollHeight;
-</script>
+
+
+
 {% endblock %} 

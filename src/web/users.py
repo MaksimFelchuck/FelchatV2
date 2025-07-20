@@ -115,9 +115,17 @@ def _render_login_error(request: Request, error_message: str):
     )
 
 @router.post("/users/logout")
-def logout(response: Response):
-    """Handle logout."""
-    user_logger.info("User logged out")
+def logout_post(response: Response):
+    """Handle logout via POST."""
+    user_logger.info("User logged out via POST")
+    response = RedirectResponse("/users/login", status_code=status.HTTP_302_FOUND)
+    response.delete_cookie(key=settings.session_cookie_name)
+    return response
+
+@router.get("/users/logout")
+def logout_get(response: Response):
+    """Handle logout via GET."""
+    user_logger.info("User logged out via GET")
     response = RedirectResponse("/users/login", status_code=status.HTTP_302_FOUND)
     response.delete_cookie(key=settings.session_cookie_name)
     return response
@@ -132,16 +140,32 @@ def users_page(
     if not current_user:
         return RedirectResponse("/users/login")
     
-    users = user_service.list_users()
-    blocked_ids = _get_blocked_user_ids(current_user.id, users, user_service)
+    # Получаем пользователей напрямую из базы данных
+    db_users = user_service.repo.list_users()
+    
+    # Создаем простые словари для шаблона
+    users_data = []
+    for user in db_users:
+        users_data.append({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "created_at": user.created_at
+        })
+    
+    # Получаем заблокированных пользователей
+    blocked_ids = []
+    for user in db_users:
+        if user_service.is_blocked(current_user.id, user.id):
+            blocked_ids.append(user.id)
     
     user_logger.info(f"User {current_user.username} accessed user list")
     return templates.TemplateResponse(
         "users.html", 
         {
             "request": request, 
-            "users": users, 
-            "current_user": current_user, 
+            "users": users_data, 
+            "current_user": {"id": current_user.id, "username": current_user.username}, 
             "blocked_ids": blocked_ids
         }
     )
@@ -161,39 +185,72 @@ def profile_page(request: Request, current_user: UserRead = Depends(get_current_
         {"request": request, "user": current_user}
     )
 
-@router.post("/users/block/{blocker_id}/{blocked_id}")
+@router.post("/users/block/{blocked_id}")
 def block_user(
     request: Request,
-    blocker_id: int,
     blocked_id: int,
     current_user: UserRead = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service)
 ):
     """Block a user."""
-    if not _validate_user_action(current_user, blocker_id):
+    if not current_user:
         return RedirectResponse("/users/login")
     
-    user_service.block_user(blocker_id, blocked_id)
-    user_logger.info(f"User {blocker_id} blocked user {blocked_id}")
-    return RedirectResponse("/users/", status_code=status.HTTP_302_FOUND)
+    user_service.block_user(current_user.id, blocked_id)
+    user_logger.info(f"User {current_user.id} blocked user {blocked_id}")
+    
+    # Получаем параметр redirect_to из запроса
+    redirect_to = request.query_params.get("redirect_to", "/users/")
+    return RedirectResponse(redirect_to, status_code=status.HTTP_302_FOUND)
 
-@router.post("/users/unblock/{blocker_id}/{blocked_id}")
+@router.post("/users/unblock/{blocked_id}")
 def unblock_user(
     request: Request,
-    blocker_id: int,
     blocked_id: int,
     current_user: UserRead = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service)
 ):
     """Unblock a user."""
-    if not _validate_user_action(current_user, blocker_id):
+    if not current_user:
         return RedirectResponse("/users/login")
     
-    user_service.unblock_user(blocker_id, blocked_id)
-    user_logger.info(f"User {blocker_id} unblocked user {blocked_id}")
-    return RedirectResponse("/users/", status_code=status.HTTP_302_FOUND)
+    user_service.unblock_user(current_user.id, blocked_id)
+    user_logger.info(f"User {current_user.id} unblocked user {blocked_id}")
+    
+    # Получаем параметр redirect_to из запроса
+    redirect_to = request.query_params.get("redirect_to", "/users/")
+    return RedirectResponse(redirect_to, status_code=status.HTTP_302_FOUND)
 
 
 def _validate_user_action(current_user: UserRead | None, user_id: int) -> bool:
     """Validate that current user can perform action for the given user ID."""
-    return current_user is not None and current_user.id == user_id 
+    return current_user is not None and current_user.id == user_id
+
+@router.get("/users/block-status/{user_id}")
+def get_block_status(
+    user_id: int,
+    current_user: UserRead = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service)
+):
+    """Get block status for a specific user."""
+    if not current_user:
+        return {"error": "Not authenticated"}
+    
+    is_blocked = user_service.is_blocked(current_user.id, user_id)
+    user_logger.info(f"Block status check: user {current_user.id} -> user {user_id}: {is_blocked}")
+    
+    return {"is_blocked": is_blocked}
+
+@router.get("/users/current")
+def get_current_user_info(
+    current_user: UserRead = Depends(get_current_user)
+):
+    """Get current user information."""
+    if not current_user:
+        return {"error": "Not authenticated"}
+    
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email
+    } 

@@ -1,22 +1,65 @@
 {% extends "base.html" %}
-{% block title %}Вход{% endblock %}
+
+{% block title %}Вход - Felchat{% endblock %}
+
 {% block content %}
-<div class="login-page mx-auto" style="max-width: 400px; padding-top: 3rem;">
-  <h2 class="mb-4 display-6 fw-bold text-center">Вход</h2>
-  <form method="post" action="/users/login" class="p-4 rounded-4 shadow bg-dark-subtle border border-2 border-primary-subtle">
-    <div class="mb-3">
-      <label for="username" class="form-label">Имя пользователя</label>
-      <input type="text" class="form-control" id="username" name="username" required>
+<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
+    <div class="card" style="max-width: 400px; width: 100%;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                <i class="fas fa-sign-in-alt"></i> Вход
+            </h1>
+            <p style="color: var(--text-secondary);">Войдите в свой аккаунт</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/users/login">
+            <div class="form-group">
+                <label for="username" class="form-label">
+                    <i class="fas fa-user"></i> Имя пользователя
+                </label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    class="form-input" 
+                    placeholder="Введите имя пользователя"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <i class="fas fa-lock"></i> Пароль
+                </label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-input" 
+                    placeholder="Введите пароль"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Нет аккаунта?
+            </p>
+            <a href="/users/register" class="btn btn-secondary">
+                <i class="fas fa-user-plus"></i> Зарегистрироваться
+            </a>
+        </div>
     </div>
-    <div class="mb-3">
-      <label for="password" class="form-label">Пароль</label>
-      <input type="password" class="form-control" id="password" name="password" required>
-    </div>
-    <button type="submit" class="btn btn-primary w-100 py-2 fs-5">Войти</button>
-  </form>
-  <div class="text-center mt-3">
-    <span class="text-secondary">Нет аккаунта?</span>
-    <a href="/users/register" class="text-info text-decoration-none ms-1">Зарегистрироваться</a>
-  </div>
 </div>
 {% endblock %} 

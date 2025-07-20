@@ -2,95 +2,93 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Felchat{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body, html { height: 100%; background: #232a36; color: #f3f6fa; }
-        .main-content { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding-top: 5.5rem; }
-        .footer {
-            background: #1b2230;
-            color: #8ca0c6;
-            padding: 1rem 0;
-            text-align: center;
-            position: fixed;
-            left: 0; right: 0; bottom: 0;
-            width: 100%;
-            font-size: 1rem;
-            letter-spacing: 0.02em;
-        }
-        .navbar {
-            background: linear-gradient(90deg, #232a36 0%, #22304a 100%);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 1000;
-        }
-        .navbar-nav { margin: 0 auto; }
-        .navbar .nav-link, .navbar .navbar-brand {
-            color: #f3f6fa !important;
-            font-weight: 500;
-            font-size: 1.15rem;
-        }
-        .navbar .nav-link.active, .navbar .nav-link:focus, .navbar .nav-link:hover {
-            color: #4eaaff !important;
-        }
-        .navbar .navbar-brand {
-            font-size: 2rem;
-            letter-spacing: 0.04em;
-        }
-        .table-dark {
-            --bs-table-bg: #232a36;
-            --bs-table-striped-bg: #25304a;
-            --bs-table-hover-bg: #2a3750;
-            color: #f3f6fa;
-        }
-        .btn-primary, .chat-btn { background: #4eaaff; border: none; font-size: 1.25rem; padding: 0.75rem 2rem; }
-        .btn-primary:hover, .chat-btn:hover { background: #3399e6; }
-        .btn-danger, .block-btn { background: #ff4e6a; border: none; font-size: 0.95rem; padding: 0.3rem 0.7rem; }
-        .btn-danger:hover, .block-btn:hover { background: #e6334e; }
-        .btn-warning { background: #ffc34e; border: none; color: #232a36; font-size: 0.95rem; padding: 0.3rem 0.7rem; }
-        .btn-warning:hover { background: #e6a933; color: #232a36; }
-        .form-control, .form-select {
-            background: #232a36; color: #f3f6fa; border: 1px solid #4eaaff;
-        }
-        .form-control:focus {
-            background: #232a36; color: #f3f6fa; border-color: #4eaaff; box-shadow: 0 0 0 0.2rem rgba(78,170,255,.25);
-        }
-        .alert-danger { background: #3a2230; color: #ffb3c6; border: none; }
-        .alert-success { background: #223a30; color: #b3ffd6; border: none; }
-        .users-page, .login-page, .register-page { max-width: 900px; margin: 0 auto; padding-top: 2.5rem; }
-        @media (max-width: 900px) {
-            .users-page, .login-page, .register-page { padding: 1rem; }
-        }
-    </style>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/static/css/main.css" rel="stylesheet">
+    <link href="/static/css/animations.css" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-<nav class="navbar navbar-expand-lg mb-4">
-  <div class="container">
-    <a class="navbar-brand fw-bold fs-3" href="/">Felchat</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-      <ul class="navbar-nav mb-2 mb-lg-0 gap-3">
-        <li class="nav-item"><a class="nav-link" href="/users/">Пользователи</a></li>
-        <li class="nav-item"><a class="nav-link" href="/users/me">Профиль</a></li>
-        {% if request.cookies.user_id is not defined %}
-          <li class="nav-item"><a class="nav-link" href="/users/login">Войти</a></li>
-          <li class="nav-item"><a class="nav-link" href="/users/register">Регистрация</a></li>
-        {% endif %}
-        {% if request.cookies.user_id is defined %}
-          <li class="nav-item"><a class="nav-link" href="/users/logout">Выйти</a></li>
-        {% endif %}
-      </ul>
-    </div>
-  </div>
-</nav>
-<div class="container main-content">
-    {% block content %}{% endblock %}
-</div>
-<footer class="footer">
-    <div>Это pet-проект. Автор: <a href="mailto:felchuck@yandex.ru" class="text-decoration-none text-info">felchuck@yandex.ru</a> | TG: <a href="https://t.me/yomaxxx" class="text-decoration-none text-info">@yomaxxx</a></div>
-</footer>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-comments"></i> Felchat
+                </div>
+                <nav class="nav-links">
+                    {% if request.cookies.user_id is defined %}
+                        <span id="current-user-display" style="color: var(--text-secondary);">
+                            <i class="fas fa-user"></i> <span id="username-placeholder">Пользователь</span>
+                        </span>
+                        <a href="/users" class="btn btn-secondary">
+                            <i class="fas fa-users"></i> Пользователи
+                        </a>
+                        <a href="/users/logout" class="btn btn-primary">
+                            <i class="fas fa-sign-out-alt"></i> Выйти
+                        </a>
+                    {% else %}
+                        <a href="/users/login" class="btn btn-secondary">
+                            <i class="fas fa-sign-in-alt"></i> Войти
+                        </a>
+                        <a href="/users/register" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Регистрация
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 2rem 0; color: var(--text-secondary); margin-top: 2rem;">
+        <div>Это pet-проект. Автор: <a href="mailto:felchuck@yandex.ru" style="color: var(--primary-color); text-decoration: none;">felchuck@yandex.ru</a> | TG: <a href="https://t.me/yomaxxx" style="color: var(--primary-color); text-decoration: none;">@yomaxxx</a></div>
+    </footer>
+
+    <!-- Custom JavaScript -->
+    <script src="/static/js/chat.js?v=2"></script>
+    
+    <!-- Load current user info -->
+    <script>
+        // Load current user information
+        async function loadCurrentUser() {
+            try {
+                const response = await fetch('/users/current');
+                if (response.ok) {
+                    const userData = await response.json();
+                    const placeholder = document.getElementById('username-placeholder');
+                    if (placeholder) {
+                        placeholder.textContent = userData.username;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+        
+        // Load user info when page loads
+        document.addEventListener('DOMContentLoaded', loadCurrentUser);
+    </script>
+    
+    {% block extra_js %}{% endblock %}
 </body>
 </html> 

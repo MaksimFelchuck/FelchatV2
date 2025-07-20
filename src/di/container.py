@@ -7,6 +7,7 @@ from src.chat.repositories.inmem.chat import ChatRepositoryInMemory
 from src.chat.ws_service import ChatWebSocketService
 from src.config import settings
 from src.users.repositories.user_repo_db import UserRepositoryDB
+from src.users.services import UserService
 from src.db.session import SessionLocal
 
 
@@ -21,6 +22,9 @@ class Container(containers.DeclarativeContainer):
     # User repository - always PostgreSQL
     user_repository = providers.Factory(UserRepositoryDB, db_session=db_session)
     
+    # User service
+    user_service = providers.Factory(UserService, repo=user_repository)
+    
     chat_repository = providers.Selector(
         config.env,
         prod=providers.Singleton(ChatRepositoryDB, redis_url=settings.redis_url),
@@ -30,5 +34,5 @@ class Container(containers.DeclarativeContainer):
     chat_service = providers.Singleton(
         ChatWebSocketService, 
         redis_url=settings.redis_url,
-        user_service=user_repository
+        user_service=user_service
     )

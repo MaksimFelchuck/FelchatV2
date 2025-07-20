@@ -1,10 +1,67 @@
 {% extends "base.html" %}
-{% block title %}Профиль{% endblock %}
+
+{% block title %}Мой профиль - Felchat{% endblock %}
+
 {% block content %}
-<h2>Профиль</h2>
-<ul class="list-group">
-  <li class="list-group-item"><b>ID:</b> {{ user.id }}</li>
-  <li class="list-group-item"><b>Имя:</b> {{ user.username }}</li>
-  <li class="list-group-item"><b>Email:</b> {{ user.email }}</li>
-</ul>
+<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
+    <div class="card" style="max-width: 500px; width: 100%;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                <i class="fas fa-user"></i> Мой профиль
+            </h1>
+            <p style="color: var(--text-secondary);">Информация о вашем аккаунте</p>
+        </div>
+
+        <div style="display: grid; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: var(--border-radius-sm);">
+                <div class="user-avatar">
+                    {{ user.username[0].upper() }}
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-weight: 600;">
+                        {{ user.username }}
+                    </h3>
+                    <p style="margin: 0; color: var(--text-secondary);">
+                        ID: {{ user.id }}
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: var(--border-radius-sm); padding: 1.5rem;">
+                <h4 style="margin: 0 0 1rem 0; color: var(--text-primary);">
+                    <i class="fas fa-info-circle"></i> Детали аккаунта
+                </h4>
+                <div style="display: grid; gap: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                        <span style="color: var(--text-secondary);">
+                            <i class="fas fa-id-card"></i> ID пользователя:
+                        </span>
+                        <span style="color: var(--text-primary); font-weight: 600;">{{ user.id }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                        <span style="color: var(--text-secondary);">
+                            <i class="fas fa-user"></i> Имя пользователя:
+                        </span>
+                        <span style="color: var(--text-primary); font-weight: 600;">{{ user.username }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+                        <span style="color: var(--text-secondary);">
+                            <i class="fas fa-envelope"></i> Email:
+                        </span>
+                        <span style="color: var(--text-primary); font-weight: 600;">{{ user.email }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <a href="/users/" class="btn btn-secondary" style="flex: 1;">
+                    <i class="fas fa-arrow-left"></i> Назад к пользователям
+                </a>
+                <a href="/users/logout" class="btn btn-danger" style="flex: 1;">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 

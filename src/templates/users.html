@@ -1,40 +1,184 @@
 {% extends "base.html" %}
-{% block title %}Пользователи{% endblock %}
+
+{% block title %}Пользователи - Felchat{% endblock %}
+
+<style>
+.user-item-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.user-item-link:hover {
+    text-decoration: none;
+    color: inherit;
+    transform: translateY(-2px);
+}
+
+.user-item {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.user-item-link:hover .user-item {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: rgba(102, 126, 234, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.user-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.user-item-link:hover .user-item::before {
+    left: 100%;
+}
+
+.chat-indicator {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+}
+
+.user-item-link:hover .chat-indicator {
+    color: #667eea;
+    transform: translateX(5px);
+    opacity: 1;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.user-item-link:hover .user-avatar {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.current-user {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.current-user:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--border-color) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.current-user::before {
+    display: none !important;
+}
+
+.current-user .user-avatar {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+}
+
+.current-user:hover .user-avatar {
+    transform: none !important;
+    box-shadow: none !important;
+}
+</style>
+
 {% block content %}
-<div class="users-page">
-  <h2 class="mb-4 display-5 fw-bold">Пользователи</h2>
-  <table class="table table-dark table-striped table-hover align-middle fs-5 rounded-3 overflow-hidden shadow">
-    <thead>
-      <tr>
-        <th>Имя</th>
-        <th>Email</th>
-        <th>Действия</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for user in users %}
-      <tr>
-        <td class="fw-semibold">{{ user.username }}</td>
-        <td>{{ user.email }}</td>
-        <td style="min-width:220px;">
-          {% if user.id != current_user.id %}
-            <div class="d-flex align-items-center gap-2">
-              <a href="/chat/{{ user.id }}" class="btn btn-lg btn-primary flex-grow-1 chat-btn">Перейти в чат</a>
-              {% if user.id in blocked_ids %}
-                <form method="post" action="/users/unblock/{{ current_user.id }}/{{ user.id }}">
-                  <button class="btn btn-warning btn-sm block-btn">Разблокировать</button>
-                </form>
-              {% else %}
-                <form method="post" action="/users/block/{{ current_user.id }}/{{ user.id }}">
-                  <button class="btn btn-danger btn-sm block-btn">Заблокировать</button>
-                </form>
-              {% endif %}
-            </div>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            <i class="fas fa-users"></i> Пользователи
+        </h1>
+        <div style="display: flex; gap: 1rem;">
+            <a href="/users/profile" class="btn btn-secondary">
+                <i class="fas fa-user"></i> Мой профиль
+            </a>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i> {{ success }}
+    </div>
+    {% endif %}
+
+    <div style="display: grid; gap: 1rem;">
+        {% for user in users %}
+            {% if user.id != current_user.id %}
+                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); padding: 1.5rem; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 1.5rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem;">
+                            {{ user.username[0].upper() }}
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-weight: 600;">
+                                {{ user.username }}
+                            </h3>
+                            <p style="margin: 0; color: var(--text-secondary);">
+                                ID: {{ user.id }} | Создан: {{ user.created_at.strftime('%d.%m.%Y %H:%M') if user.created_at else 'Неизвестно' }}
+                                {% if user.id in blocked_ids %}
+                                    <span style="color: var(--danger-color); margin-left: 0.5rem;">
+                                        <i class="fas fa-ban"></i> Заблокирован
+                                    </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <a href="/chat?user={{ user.id }}" class="btn btn-primary" style="text-decoration: none;">
+                            <i class="fas fa-comment"></i> Чат
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="user-item current-user" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); padding: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 1.5rem;">
+                        <div class="user-avatar">
+                            {{ user.username[0].upper() }}
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-weight: 600;">
+                                {{ user.username }} <span style="color: var(--text-secondary); font-size: 0.8rem;">(Вы)</span>
+                            </h3>
+                            <p style="margin: 0; color: var(--text-secondary);">
+                                ID: {{ user.id }} | Создан: {{ user.created_at.strftime('%d.%m.%Y %H:%M') if user.created_at else 'Неизвестно' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if not users %}
+    <div style="text-align: center; color: var(--text-secondary); margin: 2rem 0;">
+        <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+        <p>Пользователи не найдены</p>
+    </div>
+    {% endif %}
 </div>
 {% endblock %} 

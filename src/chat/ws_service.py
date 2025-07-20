@@ -70,6 +70,15 @@ class ChatWebSocketService:
                 del self.active_connections[user_id]
                 self._logger.info(f"User {user_id} disconnected from chat")
 
+    def get_online_users(self) -> Set[int]:
+        """
+        Get set of currently online user IDs.
+        
+        Returns:
+            Set of user IDs who have active WebSocket connections
+        """
+        return set(self.active_connections.keys())
+
     async def send_personal_message(
         self, message: str, to_user_id: int, from_user_id: int
     ) -> bool:
@@ -113,8 +122,20 @@ class ChatWebSocketService:
             return
             
         chat_key = self._get_chat_key(to_user_id, from_user_id)
+        
+        # Get username from user service if available
+        from_username = None
+        if self.user_service:
+            try:
+                user = self.user_service.get_user(from_user_id)
+                if user:
+                    from_username = user.username
+            except Exception as e:
+                self._logger.warning(f"Could not get username for user {from_user_id}: {e}")
+        
         message_data = {
             "from": from_user_id,
+            "from_username": from_username,
             "to": to_user_id,
             "message": message,
             "timestamp": int(time.time())
@@ -133,8 +154,19 @@ class ChatWebSocketService:
     
     def _create_message_data(self, message: str, from_user_id: int) -> str:
         """Create JSON message data for WebSocket transmission."""
+        # Get username from user service if available
+        from_username = None
+        if self.user_service:
+            try:
+                user = self.user_service.get_user(from_user_id)
+                if user:
+                    from_username = user.username
+            except Exception as e:
+                self._logger.warning(f"Could not get username for user {from_user_id}: {e}")
+        
         return json.dumps({
             "from": from_user_id,
+            "from_username": from_username,
             "message": message,
             "timestamp": int(time.time())
         })

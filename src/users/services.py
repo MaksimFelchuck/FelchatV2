@@ -30,7 +30,11 @@ class UserService:
         created = self.repo.create_user(user_data)
         if created is None:
             return None
-        return UserRead.model_validate(created)
+        return UserRead(
+            id=created.id,
+            username=created.username,
+            email=created.email
+        )
 
     def get_user(self, user_id: int) -> UserRead | None:
         """
@@ -43,7 +47,13 @@ class UserService:
             User object or None if not found
         """
         user = self.repo.get_user_by_id(user_id)
-        return UserRead.model_validate(user) if user else None
+        if not user:
+            return None
+        return UserRead(
+            id=user.id,
+            username=user.username,
+            email=user.email
+        )
 
     def list_users(self) -> list[UserRead]:
         """
@@ -52,7 +62,15 @@ class UserService:
         Returns:
             List of user objects
         """
-        return [UserRead.model_validate(u) for u in self.repo.list_users()]
+        users = []
+        for u in self.repo.list_users():
+            user_read = UserRead(
+                id=u.id,
+                username=u.username,
+                email=u.email
+            )
+            users.append(user_read)
+        return users
 
     def block_user(self, blocker_id: int, blocked_id: int) -> None:
         """
@@ -110,4 +128,8 @@ class UserService:
         if not self.repo.verify_password(password, password_hash):
             return None
 
-        return UserRead.model_validate(user)
+        return UserRead(
+            id=user.id,
+            username=user.username,
+            email=user.email
+        )
