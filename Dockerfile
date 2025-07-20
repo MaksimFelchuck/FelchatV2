@@ -14,12 +14,4 @@ COPY ./src ./src
 COPY alembic.ini ./
 COPY alembic ./alembic
 
-# Create startup script
-RUN echo '#!/bin/bash\n\
-echo "Running database migrations..."\n\
-alembic upgrade head\n\
-echo "Starting application..."\n\
-uvicorn src.main:app --host 0.0.0.0 --port $PORT\n\
-' > /app/start.sh && chmod +x /app/start.sh
-
-CMD ["/app/start.sh"] 
+# No startup script needed - Railway manages this via railway.json 
