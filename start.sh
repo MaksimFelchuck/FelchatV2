@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e  # Exit on any error
-
 echo "=== FelchatV2 Startup ==="
 echo "Current directory: $(pwd)"
 echo "Files in current directory:"
@@ -17,10 +15,11 @@ echo "Waiting for database to be ready..."
 sleep 10
 
 echo "Running database migrations..."
-echo "Alembic version: $(alembic --version)"
+echo "Alembic version: $(alembic --version || echo 'Alembic not found')"
 echo "Current alembic revision: $(alembic current 2>/dev/null || echo 'No current revision')"
-alembic upgrade head
+alembic upgrade head || { echo "Migration failed!"; exit 1; }
 echo "Migrations completed successfully!"
 
 echo "Starting application..."
-exec uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000} 
+echo "Uvicorn version: $(uvicorn --version || echo 'Uvicorn not found')"
+exec uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000} || { echo "Application failed to start!"; exit 1; } 
