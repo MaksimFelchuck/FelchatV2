@@ -13,5 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./src ./src
 COPY alembic.ini ./
 COPY alembic ./alembic
+COPY start.sh ./
 
-# No startup script needed - Railway manages this via railway.json 
+RUN chmod +x start.sh
+
+CMD ["./start.sh"] 
