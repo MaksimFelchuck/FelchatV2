@@ -29,11 +29,13 @@ class UserRepositoryInMemory(AbstractUserRepository):
             if user.username == user_data.username or user.email == user_data.email:
                 return None
         
+        # For testing, we'll use the password as the hash
+        # In production, this should be properly hashed
         user = User(
             id=self._next_id,
             username=user_data.username,
             email=user_data.email,
-            password_hash=user_data.password
+            password_hash=user_data.password  # Store password as hash for testing
         )
         self.users[user.id] = user
         self._next_id += 1
@@ -151,3 +153,18 @@ class UserRepositoryInMemory(AbstractUserRepository):
         elif (user2_id, user1_id) in self.blocks:
             return (user2_id, user1_id)
         return None
+
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        """
+        Verify password against hash (simple comparison for testing).
+        
+        Args:
+            plain_password: Plain text password
+            hashed_password: Hashed password from database
+            
+        Returns:
+            True if password matches
+        """
+        # For testing purposes, we'll do a simple comparison
+        # In production, this should use proper password hashing
+        return plain_password == hashed_password

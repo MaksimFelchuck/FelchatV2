@@ -37,7 +37,7 @@ def get_current_user(request: Request, user_service: UserService = Depends(get_u
 @router.get("/users/register")
 def register_page(request: Request):
     """Render registration page."""
-    return templates.TemplateResponse("register.html", {"request": request})
+    return templates.TemplateResponse(request, "register.html")
 
 @router.post("/users/register")
 def register(
@@ -73,14 +73,14 @@ def register(
 def _render_register_error(request: Request, error_message: str):
     """Render registration page with error message."""
     return templates.TemplateResponse(
-        "register.html", 
-        {"request": request, "error": error_message}
+        request, "register.html", 
+        {"error": error_message}
     )
 
 @router.get("/users/login")
 def login_page(request: Request):
     """Render login page."""
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html")
 
 @router.post("/users/login")
 def login(
@@ -110,8 +110,8 @@ def login(
 def _render_login_error(request: Request, error_message: str):
     """Render login page with error message."""
     return templates.TemplateResponse(
-        "login.html", 
-        {"request": request, "error": error_message}
+        request, "login.html", 
+        {"error": error_message}
     )
 
 @router.post("/users/logout")
@@ -161,9 +161,8 @@ def users_page(
     
     user_logger.info(f"User {current_user.username} accessed user list")
     return templates.TemplateResponse(
-        "users.html", 
+        request, "users.html", 
         {
-            "request": request, 
             "users": users_data, 
             "current_user": {"id": current_user.id, "username": current_user.username}, 
             "blocked_ids": blocked_ids
@@ -181,8 +180,8 @@ def profile_page(request: Request, current_user: UserRead = Depends(get_current_
     if not current_user:
         return RedirectResponse("/users/login")
     return templates.TemplateResponse(
-        "profile.html", 
-        {"request": request, "user": current_user}
+        request, "profile.html", 
+        {"user": current_user}
     )
 
 @router.post("/users/block/{blocked_id}")

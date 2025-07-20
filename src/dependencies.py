@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from src.chat.ws_service import ChatWebSocketService
 from src.users.services import UserService
-from src.users.repositories.user_repo_db import UserRepositoryDB
 from src.db.session import SessionLocal
 
 
@@ -30,10 +29,9 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-def get_user_service(db: Session = Depends(get_db)) -> UserService:
-    """Get UserService instance with PostgreSQL database session."""
-    repo = UserRepositoryDB(db_session=db)
-    return UserService(repo=repo)
+def get_user_service(container=Depends(get_container)) -> UserService:
+    """Get UserService instance from DI container."""
+    return container.user_service()
 
 
 def get_chat_service(container=Depends(get_container)) -> ChatWebSocketService:

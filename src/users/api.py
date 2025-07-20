@@ -17,6 +17,7 @@ def register(
     """Register a new user via API."""
     try:
         result = user_service.register(user_data)
+        
         if result is None:
             raise HTTPException(status_code=400, detail="User already exists")
         response.status_code = 201
@@ -64,7 +65,7 @@ def list_users(user_service: UserService = Depends(get_user_service)):
 @api_router.post("/block/{user_id}")
 def block_user(
     user_id: int, 
-    current_user_id: int = Cookie(None),
+    current_user_id: int = Cookie(None, alias="user_id"),
     user_service: UserService = Depends(get_user_service)
 ):
     """Block a user via API."""
@@ -76,7 +77,7 @@ def block_user(
 @api_router.delete("/block/{user_id}")
 def unblock_user(
     user_id: int, 
-    current_user_id: int = Cookie(None),
+    current_user_id: int = Cookie(None, alias="user_id"),
     user_service: UserService = Depends(get_user_service)
 ):
     """Unblock a user via API."""

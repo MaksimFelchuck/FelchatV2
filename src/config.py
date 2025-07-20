@@ -17,6 +17,10 @@ class Settings:
         # Environment
         self.env = os.getenv("ENV", "prod")
         
+        # Test environment detection
+        if os.getenv("PYTEST_CURRENT_TEST") or os.getenv("TESTING"):
+            self.env = "test"
+        
         # WebSocket settings
         self.websocket_ping_interval = int(os.getenv("WEBSOCKET_PING_INTERVAL", "20"))
         self.websocket_ping_timeout = int(os.getenv("WEBSOCKET_PING_TIMEOUT", "20"))
