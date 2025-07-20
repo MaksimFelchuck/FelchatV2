@@ -36,11 +36,13 @@ class TestPagesAPI:
     def test_users_list_page_authenticated(self, client: TestClient):
         """Test accessing users list page when authenticated."""
         # First login to get cookies
-        cookies = create_and_login_user(client, "listuser", "list@example.com", "password123")
-        
+        cookies = create_and_login_user(
+            client, "listuser", "list@example.com", "password123"
+        )
+
         # Set cookies on client
         client.cookies.update(cookies)
-        
+
         # Access users list page
         response = client.get("/users/")
         assert response.status_code == 200
@@ -57,11 +59,13 @@ class TestPagesAPI:
     def test_profile_page_authenticated(self, client: TestClient):
         """Test accessing profile page when authenticated."""
         # First login to get cookies
-        cookies = create_and_login_user(client, "profileuser", "profile@example.com", "password123")
-        
+        cookies = create_and_login_user(
+            client, "profileuser", "profile@example.com", "password123"
+        )
+
         # Set cookies on client
         client.cookies.update(cookies)
-        
+
         # Access profile page
         response = client.get("/users/profile")
         assert response.status_code == 200
@@ -91,4 +95,4 @@ class TestPagesAPI:
     def test_404_page(self, client: TestClient):
         """Test 404 page for non-existent routes."""
         response = client.get("/nonexistent-page")
-        assert response.status_code == 404 
+        assert response.status_code == 404

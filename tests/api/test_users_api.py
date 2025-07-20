@@ -15,7 +15,7 @@ class TestUsersAPI:
         user_data = {
             "username": "newuser",
             "email": "newuser@example.com",
-            "password": "password123"
+            "password": "password123",
         }
 
         response = client.post("/api/v1/users/register", json=user_data)
@@ -32,7 +32,7 @@ class TestUsersAPI:
         user_data = {
             "username": "duplicateuser",
             "email": "duplicate@example.com",
-            "password": "password123"
+            "password": "password123",
         }
 
         # First registration
@@ -51,15 +51,12 @@ class TestUsersAPI:
         user_data = {
             "username": "loginuser",
             "email": "login@example.com",
-            "password": "password123"
+            "password": "password123",
         }
         client.post("/api/v1/users/register", json=user_data)
 
         # Then login
-        login_data = {
-            "username": "loginuser",
-            "password": "password123"
-        }
+        login_data = {"username": "loginuser", "password": "password123"}
         response = client.post("/api/v1/users/login", json=login_data)
 
         assert response.status_code == 200
@@ -70,10 +67,7 @@ class TestUsersAPI:
     @pytest.mark.api
     def test_login_user_invalid_credentials(self, client: TestClient):
         """Test login with invalid credentials via API."""
-        login_data = {
-            "username": "nonexistent",
-            "password": "wrongpassword"
-        }
+        login_data = {"username": "nonexistent", "password": "wrongpassword"}
         response = client.post("/api/v1/users/login", json=login_data)
 
         assert response.status_code == 401
@@ -83,11 +77,13 @@ class TestUsersAPI:
     def test_logout_user(self, client: TestClient):
         """Test user logout via API."""
         # First login to get cookies
-        cookies = create_and_login_user(client, "logoutuser", "logout@example.com", "password123")
-        
+        cookies = create_and_login_user(
+            client, "logoutuser", "logout@example.com", "password123"
+        )
+
         # Set cookies on client
         client.cookies.update(cookies)
-        
+
         # Then logout
         response = client.post("/api/v1/users/logout")
         assert response.status_code == 200
@@ -97,11 +93,13 @@ class TestUsersAPI:
     def test_get_user_info_authenticated(self, client: TestClient):
         """Test getting user info when authenticated via API."""
         # First login to get cookies
-        cookies = create_and_login_user(client, "infouser", "info@example.com", "password123")
-        
+        cookies = create_and_login_user(
+            client, "infouser", "info@example.com", "password123"
+        )
+
         # Set cookies on client
         client.cookies.update(cookies)
-        
+
         # Get user info
         response = client.get("/api/v1/users/me")
         assert response.status_code == 200
@@ -128,11 +126,13 @@ class TestUsersAPI:
     def test_block_user_success(self, client: TestClient):
         """Test successful user blocking via API."""
         # First login to get cookies
-        cookies = create_and_login_user(client, "blocker", "blocker@example.com", "password123")
-        
+        cookies = create_and_login_user(
+            client, "blocker", "blocker@example.com", "password123"
+        )
+
         # Set cookies on client
         client.cookies.update(cookies)
-        
+
         # Block user (assuming user ID 2 exists from setup)
         response = client.post("/api/v1/users/block/2")
         assert response.status_code == 200
@@ -149,14 +149,16 @@ class TestUsersAPI:
     def test_unblock_user_success(self, client: TestClient):
         """Test successful user unblocking via API."""
         # First login to get cookies
-        cookies = create_and_login_user(client, "unblocker", "unblocker@example.com", "password123")
-        
+        cookies = create_and_login_user(
+            client, "unblocker", "unblocker@example.com", "password123"
+        )
+
         # Set cookies on client
         client.cookies.update(cookies)
-        
+
         # First block user
         client.post("/api/v1/users/block/2")
-        
+
         # Then unblock (uses DELETE method)
         response = client.delete("/api/v1/users/block/2")
         assert response.status_code == 200
@@ -167,4 +169,4 @@ class TestUsersAPI:
         """Test unblocking user when not authenticated via API."""
         response = client.delete("/api/v1/users/block/2")
         assert response.status_code == 401
-        assert "Not authenticated" in response.json()["detail"] 
+        assert "Not authenticated" in response.json()["detail"]

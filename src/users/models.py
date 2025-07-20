@@ -9,7 +9,7 @@ from src.db.base import Base
 
 class User(Base):
     """User model representing application users."""
-    
+
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -18,9 +18,7 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(
-        DateTime, 
-        default=datetime.datetime.utcnow, 
-        onupdate=datetime.datetime.utcnow
+        DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow
     )
 
     def __repr__(self):
@@ -30,7 +28,7 @@ class User(Base):
 
 class UserBlock(Base):
     """User block model representing blocked relationships between users."""
-    
+
     __tablename__ = "user_blocks"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -40,7 +38,7 @@ class UserBlock(Base):
 
     # Ensure unique blocking relationship
     __table_args__ = (
-        UniqueConstraint('blocker_id', 'blocked_id', name='unique_block'),
+        UniqueConstraint("blocker_id", "blocked_id", name="unique_block"),
     )
 
     def __repr__(self):

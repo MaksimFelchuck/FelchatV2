@@ -1,9 +1,8 @@
 """Database implementation of chat repository using Redis."""
 
 import json
-from datetime import datetime
-from typing import Any
 import logging
+from datetime import datetime
 
 import redis.asyncio as redis
 from redis.asyncio import Redis
@@ -15,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 class ChatRepositoryDB(AbstractChatRepository):
     """Redis-based implementation of chat repository."""
-    
+
     def __init__(self, redis_url: str):
         """
         Initialize the repository with Redis connection.
-        
+
         Args:
             redis_url: Redis connection URL
         """
@@ -35,7 +34,7 @@ class ChatRepositoryDB(AbstractChatRepository):
     async def save_message(self, from_user: int, to_user: int, message: str) -> None:
         """
         Save a message to Redis.
-        
+
         Args:
             from_user: ID of the user sending the message
             to_user: ID of the user receiving the message
@@ -48,7 +47,7 @@ class ChatRepositoryDB(AbstractChatRepository):
                 "from": from_user,
                 "to": to_user,
                 "message": message,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.utcnow().isoformat(),
             }
             await redis_client.rpush(key, json.dumps(message_data))  # type: ignore
             logger.debug(f"Message saved from user {from_user} to user {to_user}")
@@ -56,15 +55,17 @@ class ChatRepositoryDB(AbstractChatRepository):
             logger.error(f"Failed to save message: {str(e)}")
             raise
 
-    async def get_history(self, user1: int, user2: int, limit: int = 50) -> list[dict[str, Any]]:
+    async def get_history(
+        self, user1: int, user2: int, limit: int = 50
+    ) -> list[dict[str, str | int | float | bool | None]]:
         """
         Get chat history from Redis.
-        
+
         Args:
             user1: ID of the first user
             user2: ID of the second user
             limit: Maximum number of messages to return
-            
+
         Returns:
             List of message objects with timestamp, from, to, and message fields
         """
@@ -78,7 +79,9 @@ class ChatRepositoryDB(AbstractChatRepository):
                     parsed_message = json.loads(message)
                     parsed_messages.append(parsed_message)
                 except json.JSONDecodeError as e:
-                    logger.warning(f"Failed to parse message: {message}, error: {str(e)}")
+                    logger.warning(
+                        f"Failed to parse message: {message}, error: {str(e)}"
+                    )
                     continue
             return parsed_messages
         except Exception as e:
@@ -94,4 +97,4 @@ class ChatRepositoryDB(AbstractChatRepository):
                 logger.debug("Redis connection closed")
         except Exception as e:
             logger.error(f"Failed to close Redis connection: {str(e)}")
-            raise 
+            raise

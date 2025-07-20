@@ -18,6 +18,7 @@ from src.web.users import router as web_users_router
 container = Container()
 container.config.env.from_env("ENV", default=settings.env)
 
+
 class NoCacheMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
@@ -25,6 +26,7 @@ class NoCacheMiddleware(BaseHTTPMiddleware):
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
         return response
+
 
 app = FastAPI(title="Felchat", version="1.0.0")
 app.add_middleware(NoCacheMiddleware)
@@ -45,6 +47,7 @@ __all__ = ["container", "app"]
 static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+
 @app.get("/")
 def root(request: Request):
     """Redirect to appropriate page based on authentication status."""
@@ -52,14 +55,16 @@ def root(request: Request):
     if user_id:
         app_logger.info(f"Authenticated user {user_id} accessing root")
         return RedirectResponse("/users/")
-    
+
     app_logger.info("Unauthenticated user accessing root, redirecting to login")
     return RedirectResponse("/users/login")
+
 
 @app.get("/ping")
 def ping():
     """Health check endpoint."""
     return {"status": "ok"}
+
 
 app.include_router(users_api_router)
 app.include_router(web_users_router)

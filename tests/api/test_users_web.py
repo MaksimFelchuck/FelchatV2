@@ -20,7 +20,7 @@ class TestUsersWeb:
         user_data = {
             "username": "newuser",
             "email": "newuser@example.com",
-            "password": "password123"
+            "password": "password123",
         }
 
         response = client.post("/users/register", data=user_data)
@@ -35,7 +35,7 @@ class TestUsersWeb:
         user_data = {
             "username": "duplicateuser",
             "email": "duplicate@example.com",
-            "password": "password123"
+            "password": "password123",
         }
         response1 = client.post("/users/register", data=user_data)
         assert response1.status_code == 200
@@ -59,15 +59,12 @@ class TestUsersWeb:
         user_data = {
             "username": "loginuser",
             "email": "login@example.com",
-            "password": "password123"
+            "password": "password123",
         }
         client.post("/users/register", data=user_data)
 
         # Then login
-        login_data = {
-            "username": "loginuser",
-            "password": "password123"
-        }
+        login_data = {"username": "loginuser", "password": "password123"}
         response = client.post("/users/login", data=login_data)
 
         assert response.status_code == 200  # Actually returns 200, not 302
@@ -78,10 +75,7 @@ class TestUsersWeb:
     @pytest.mark.api
     def test_login_user_invalid_credentials(self, client: TestClient):
         """Test login with invalid credentials via web form."""
-        login_data = {
-            "username": "nonexistent",
-            "password": "wrongpassword"
-        }
+        login_data = {"username": "nonexistent", "password": "wrongpassword"}
         response = client.post("/users/login", data=login_data)
 
         assert response.status_code == 200  # Returns error page
@@ -115,16 +109,13 @@ class TestUsersWeb:
         user_data = {
             "username": "testuser",
             "email": "test@example.com",
-            "password": "password123"
+            "password": "password123",
         }
         client.post("/users/register", data=user_data)
-        
-        login_data = {
-            "username": "testuser",
-            "password": "password123"
-        }
+
+        login_data = {"username": "testuser", "password": "password123"}
         login_response = client.post("/users/login", data=login_data)
-        
+
         # Set cookies on client for authenticated requests
         client.cookies.update(login_response.cookies)
 
@@ -147,16 +138,13 @@ class TestUsersWeb:
         user_data = {
             "username": "testuser",
             "email": "test@example.com",
-            "password": "password123"
+            "password": "password123",
         }
         client.post("/users/register", data=user_data)
-        
-        login_data = {
-            "username": "testuser",
-            "password": "password123"
-        }
+
+        login_data = {"username": "testuser", "password": "password123"}
         login_response = client.post("/users/login", data=login_data)
-        
+
         # Set cookies on client for authenticated requests
         client.cookies.update(login_response.cookies)
 
@@ -172,16 +160,13 @@ class TestUsersWeb:
         user_data = {
             "username": "blocker",
             "email": "blocker@example.com",
-            "password": "password123"
+            "password": "password123",
         }
         client.post("/users/register", data=user_data)
-        
-        login_data = {
-            "username": "blocker",
-            "password": "password123"
-        }
+
+        login_data = {"username": "blocker", "password": "password123"}
         login_response = client.post("/users/login", data=login_data)
-        
+
         # Set cookies on client for authenticated requests
         client.cookies.update(login_response.cookies)
 
@@ -203,16 +188,13 @@ class TestUsersWeb:
         user_data = {
             "username": "unblocker",
             "email": "unblocker@example.com",
-            "password": "password123"
+            "password": "password123",
         }
         client.post("/users/register", data=user_data)
-        
-        login_data = {
-            "username": "unblocker",
-            "password": "password123"
-        }
+
+        login_data = {"username": "unblocker", "password": "password123"}
         login_response = client.post("/users/login", data=login_data)
-        
+
         # Set cookies on client for authenticated requests
         client.cookies.update(login_response.cookies)
 
@@ -237,16 +219,13 @@ class TestUsersWeb:
         user_data = {
             "username": "statususer",
             "email": "status@example.com",
-            "password": "password123"
+            "password": "password123",
         }
         client.post("/users/register", data=user_data)
-        
-        login_data = {
-            "username": "statususer",
-            "password": "password123"
-        }
+
+        login_data = {"username": "statususer", "password": "password123"}
         login_response = client.post("/users/login", data=login_data)
-        
+
         # Set cookies on client for authenticated requests
         client.cookies.update(login_response.cookies)
 
@@ -272,16 +251,13 @@ class TestUsersWeb:
         user_data = {
             "username": "currentuser",
             "email": "current@example.com",
-            "password": "password123"
+            "password": "password123",
         }
         client.post("/users/register", data=user_data)
-        
-        login_data = {
-            "username": "currentuser",
-            "password": "password123"
-        }
+
+        login_data = {"username": "currentuser", "password": "password123"}
         login_response = client.post("/users/login", data=login_data)
-        
+
         # Set cookies on client for authenticated requests
         client.cookies.update(login_response.cookies)
 
@@ -299,4 +275,4 @@ class TestUsersWeb:
         assert response.status_code == 200
         data = response.json()
         assert "error" in data
-        assert data["error"] == "Not authenticated" 
+        assert data["error"] == "Not authenticated"

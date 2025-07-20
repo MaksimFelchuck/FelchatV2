@@ -1,7 +1,6 @@
 import pytest
 import asyncio
 import os
-from typing import AsyncGenerator
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock
 
@@ -14,22 +13,15 @@ from src.chat.ws_service import ChatWebSocketService
 def create_and_login_user(client: TestClient, username: str, email: str, password: str):
     """Helper function to create a user and login via API."""
     # Create user
-    user_data = {
-        "username": username,
-        "email": email,
-        "password": password
-    }
+    user_data = {"username": username, "email": email, "password": password}
     register_response = client.post("/api/v1/users/register", json=user_data)
     assert register_response.status_code == 201
-    
+
     # Login
-    login_data = {
-        "username": username,
-        "password": password
-    }
+    login_data = {"username": username, "password": password}
     login_response = client.post("/api/v1/users/login", json=login_data)
     assert login_response.status_code == 200
-    
+
     # Return cookies for authenticated requests
     return login_response.cookies
 
@@ -81,12 +73,13 @@ def client(container: Container) -> TestClient:
     """Create test client with automatic InMem repositories."""
     # Override the global container in main.py
     import src.main
+
     original_container = src.main.container
     src.main.container = container
-    
+
     with TestClient(app) as test_client:
         yield test_client
-    
+
     # Restore original container
     src.main.container = original_container
 
@@ -99,20 +92,20 @@ def sample_users():
             "id": 1,
             "username": "testuser1",
             "email": "test1@example.com",
-            "password": "password123"
+            "password": "password123",
         },
         {
             "id": 2,
-            "username": "testuser2", 
+            "username": "testuser2",
             "email": "test2@example.com",
-            "password": "password456"
+            "password": "password456",
         },
         {
             "id": 3,
             "username": "testuser3",
-            "email": "test3@example.com", 
-            "password": "password789"
-        }
+            "email": "test3@example.com",
+            "password": "password789",
+        },
     ]
 
 
@@ -120,12 +113,12 @@ def sample_users():
 def setup_users(user_service: UserService, sample_users):
     """Setup test users in the repository."""
     from src.users.schemas import UserCreate
-    
+
     for user_data in sample_users:
         user_create = UserCreate(
             username=user_data["username"],
             email=user_data["email"],
-            password=user_data["password"]
+            password=user_data["password"],
         )
         user_service.register(user_create)
-    return sample_users 
+    return sample_users
