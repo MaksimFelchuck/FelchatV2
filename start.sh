@@ -3,6 +3,7 @@
 echo "=== FelchatV2 Startup ==="
 echo "Environment variables:"
 echo "DATABASE_URL: ${DATABASE_URL:+SET}"
+echo "DATABASE_URL value: ${DATABASE_URL}"
 echo "REDIS_URL: ${REDIS_URL:+SET}"
 echo "PORT: ${PORT:-8000}"
 echo "ENV: ${ENV:-prod}"
