@@ -16,7 +16,10 @@ sleep 10
 
 echo "Running database migrations..."
 echo "Alembic version: $(alembic --version || echo 'Alembic not found')"
+echo "Alembic config file: $(ls -la alembic.ini)"
+echo "Alembic directory: $(ls -la alembic/)"
 echo "Current alembic revision: $(alembic current 2>/dev/null || echo 'No current revision')"
+echo "Available revisions: $(alembic history --verbose 2>/dev/null || echo 'Cannot get history')"
 alembic upgrade head || { echo "Migration failed!"; exit 1; }
 echo "Migrations completed successfully!"
 
