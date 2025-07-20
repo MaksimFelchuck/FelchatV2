@@ -7,6 +7,9 @@ echo "REDIS_URL: ${REDIS_URL:+SET}"
 echo "PORT: ${PORT:-8000}"
 echo "ENV: ${ENV:-prod}"
 
+echo "Waiting for database to be ready..."
+sleep 10
+
 echo "Running database migrations..."
 alembic upgrade head
 
