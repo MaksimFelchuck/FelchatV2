@@ -17,7 +17,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="/static/css/main.css?v=5" rel="stylesheet">
+    <link href="/static/css/main.css?v=6" rel="stylesheet">
     <link href="/static/css/animations.css?v=4" rel="stylesheet">
     
     {% block extra_css %}{% endblock %}
@@ -41,6 +41,9 @@
                         <a href="/users" class="btn btn-secondary">
                             <i class="fas fa-users"></i> Пользователи
                         </a>
+                        <button id="about-btn" class="btn btn-secondary" title="О проекте">
+                            <i class="fas fa-info-circle"></i> О проекте
+                        </button>
                         <a href="/users/logout" class="btn btn-primary">
                             <i class="fas fa-sign-out-alt"></i> Выйти
                         </a>
@@ -48,6 +51,9 @@
                         <a href="/users/login" class="btn btn-secondary">
                             <i class="fas fa-sign-in-alt"></i> Войти
                         </a>
+                        <button id="about-btn" class="btn btn-secondary" title="О проекте">
+                            <i class="fas fa-info-circle"></i> О проекте
+                        </button>
                         <a href="/users/register" class="btn btn-primary">
                             <i class="fas fa-user-plus"></i> Регистрация
                         </a>
@@ -62,10 +68,61 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer style="text-align: center; padding: 2rem 0; color: var(--text-secondary); margin-top: 2rem;">
-        <div>Это pet-проект. Автор: <a href="mailto:felchuck@yandex.ru" style="color: var(--primary-color); text-decoration: none;">felchuck@yandex.ru</a> | TG: <a href="https://t.me/yomaxxx" style="color: var(--primary-color); text-decoration: none;">@yomaxxx</a></div>
-    </footer>
+    <!-- About Project Modal -->
+    <div id="about-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-rocket"></i> О проекте Felchat</h2>
+                <button class="modal-close" id="close-about-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="project-info">
+                    <div class="project-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="project-description">
+                        <h3>Felchat - Современный мессенджер</h3>
+                        <p>Это pet-проект, демонстрирующий современные технологии веб-разработки. Реализован с использованием FastAPI, WebSocket, SQLAlchemy и современных веб-технологий.</p>
+                    </div>
+                </div>
+                
+                <div class="author-info">
+                    <div class="author-avatar">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="author-details">
+                        <h4>Автор проекта</h4>
+                        <div class="contact-links">
+                            <a href="mailto:felchuck@yandex.ru" class="contact-link email">
+                                <i class="fas fa-envelope"></i>
+                                <span>felchuck@yandex.ru</span>
+                            </a>
+                            <a href="https://t.me/yomaxxx" class="contact-link telegram" target="_blank">
+                                <i class="fab fa-telegram"></i>
+                                <span>@yomaxxx</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tech-stack">
+                    <h4>Технологии</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">FastAPI</span>
+                        <span class="tech-tag">WebSocket</span>
+                        <span class="tech-tag">SQLAlchemy</span>
+                        <span class="tech-tag">PostgreSQL</span>
+                        <span class="tech-tag">Redis</span>
+                        <span class="tech-tag">Docker</span>
+                        <span class="tech-tag">JavaScript</span>
+                        <span class="tech-tag">CSS3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Custom JavaScript -->
     <script src="/static/js/chat.js?v=5"></script>
@@ -114,6 +171,50 @@
         
         // Load user info when page loads
         document.addEventListener('DOMContentLoaded', loadCurrentUser);
+        
+        // Modal functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const aboutBtn = document.getElementById('about-btn');
+            const aboutModal = document.getElementById('about-modal');
+            const closeModal = document.getElementById('close-about-modal');
+            
+            // Open modal
+            aboutBtn.addEventListener('click', function() {
+                aboutModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+            
+            // Close modal
+            function closeAboutModal() {
+                aboutModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            closeModal.addEventListener('click', closeAboutModal);
+            
+            // Close on overlay click
+            aboutModal.addEventListener('click', function(e) {
+                if (e.target === aboutModal) {
+                    closeAboutModal();
+                }
+            });
+            
+            // Close on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && aboutModal.classList.contains('active')) {
+                    closeAboutModal();
+                }
+            });
+            
+            // Auto-show modal on first visit (optional)
+            if (!localStorage.getItem('aboutModalShown')) {
+                setTimeout(() => {
+                    aboutModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                    localStorage.setItem('aboutModalShown', 'true');
+                }, 2000); // Show after 2 seconds
+            }
+        });
     </script>
     
     {% block extra_js %}{% endblock %}
