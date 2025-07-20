@@ -7,5 +7,8 @@ echo "REDIS_URL: ${REDIS_URL:+SET}"
 echo "PORT: ${PORT:-8000}"
 echo "ENV: ${ENV:-prod}"
 
+echo "Running database migrations..."
+alembic upgrade head
+
 echo "Starting application..."
 exec uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000} 
