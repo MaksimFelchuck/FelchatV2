@@ -184,6 +184,33 @@ class UserRepositoryDB(AbstractUserRepository):
         
         return block_exists is not None
 
+    def who_blocked_whom(self, user1_id: int, user2_id: int) -> tuple[int, int] | None:
+        """
+        Check who blocked whom between two users.
+        
+        Args:
+            user1_id: ID of the first user
+            user2_id: ID of the second user
+            
+        Returns:
+            Tuple (blocker_id, blocked_id) if there's a block, None otherwise
+        """
+        # Check if user1 blocked user2
+        block = self.db_session.query(UserBlock).filter(
+            (UserBlock.blocker_id == user1_id) & (UserBlock.blocked_id == user2_id)
+        ).first()
+        if block:
+            return (user1_id, user2_id)
+        
+        # Check if user2 blocked user1
+        block = self.db_session.query(UserBlock).filter(
+            (UserBlock.blocker_id == user2_id) & (UserBlock.blocked_id == user1_id)
+        ).first()
+        if block:
+            return (user2_id, user1_id)
+        
+        return None
+
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """
         Verify password against hash.

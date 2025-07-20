@@ -134,3 +134,20 @@ class UserRepositoryInMemory(AbstractUserRepository):
             (user1_id, user2_id) in self.blocks or 
             (user2_id, user1_id) in self.blocks
         )
+
+    def who_blocked_whom(self, user1_id: int, user2_id: int) -> tuple[int, int] | None:
+        """
+        Check who blocked whom between two users.
+        
+        Args:
+            user1_id: ID of the first user
+            user2_id: ID of the second user
+            
+        Returns:
+            Tuple (blocker_id, blocked_id) if there's a block, None otherwise
+        """
+        if (user1_id, user2_id) in self.blocks:
+            return (user1_id, user2_id)
+        elif (user2_id, user1_id) in self.blocks:
+            return (user2_id, user1_id)
+        return None

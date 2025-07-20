@@ -114,9 +114,10 @@ class UserRepositoryDB(AbstractUserRepository):
             blocked_id: ID of the user being unblocked
         """
         with SessionLocal() as db:
+            # Удаляем блокировку в обе стороны
             db.query(UserBlock).filter(
-                UserBlock.blocker_id == blocker_id,
-                UserBlock.blocked_id == blocked_id
+                ((UserBlock.blocker_id == blocker_id) & (UserBlock.blocked_id == blocked_id)) |
+                ((UserBlock.blocker_id == blocked_id) & (UserBlock.blocked_id == blocker_id))
             ).delete()
             db.commit()
 
@@ -136,3 +137,31 @@ class UserRepositoryDB(AbstractUserRepository):
                 ((UserBlock.blocker_id == user1_id) & (UserBlock.blocked_id == user2_id)) |
                 ((UserBlock.blocker_id == user2_id) & (UserBlock.blocked_id == user1_id))
             ).first() is not None
+
+    def who_blocked_whom(self, user1_id: int, user2_id: int) -> tuple[int, int] | None:
+        """
+        Check who blocked whom between two users.
+        
+        Args:
+            user1_id: ID of the first user
+            user2_id: ID of the second user
+            
+        Returns:
+            Tuple (blocker_id, blocked_id) if there's a block, None otherwise
+        """
+        with SessionLocal() as db:
+            # Check if user1 blocked user2
+            block = db.query(UserBlock).filter(
+                (UserBlock.blocker_id == user1_id) & (UserBlock.blocked_id == user2_id)
+            ).first()
+            if block:
+                return (user1_id, user2_id)
+            
+            # Check if user2 blocked user1
+            block = db.query(UserBlock).filter(
+                (UserBlock.blocker_id == user2_id) & (UserBlock.blocked_id == user1_id)
+            ).first()
+            if block:
+                return (user2_id, user1_id)
+            
+            return None

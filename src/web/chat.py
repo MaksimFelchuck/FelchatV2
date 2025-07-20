@@ -79,6 +79,16 @@ async def _prepare_chat_data(
     user_info = _get_user_info(current_user, other_user_id, user_service)
     is_blocked = user_service.is_blocked(current_user, other_user_id)
     
+    # Check who blocked whom
+    block_info = user_service.who_blocked_whom(current_user, other_user_id)
+    is_blocker = False
+    is_blocked_user = False
+    
+    if block_info:
+        blocker_id, blocked_id = block_info
+        is_blocker = (blocker_id == current_user)
+        is_blocked_user = (blocked_id == current_user)
+    
     # Get all users for sidebar - use simple dictionaries
     db_users = user_service.repo.list_users()
     users = []
@@ -96,6 +106,9 @@ async def _prepare_chat_data(
     # Get online users from chat service
     online_users = chat_service.get_online_users()
     
+    # Get current user object for detailed info
+    current_user_obj = user_service.repo.get_user_by_id(current_user)
+    
     return {
         "other_user_id": other_user_id,
         "current_user_id": current_user,
@@ -103,7 +116,10 @@ async def _prepare_chat_data(
         "current_user": current_user,
         "username": user_info["username"],
         "other_username": user_info["other_username"],
+        "email": current_user_obj.email if current_user_obj else "",
         "is_blocked": is_blocked,
+        "is_blocker": is_blocker,
+        "is_blocked_user": is_blocked_user,
         "users": users,
         "blocked_ids": blocked_ids,
         "online_users": online_users

@@ -105,6 +105,19 @@ class UserService:
         """
         return self.repo.is_blocked(user1_id, user2_id)
 
+    def who_blocked_whom(self, user1_id: int, user2_id: int) -> tuple[int, int] | None:
+        """
+        Check who blocked whom between two users.
+        
+        Args:
+            user1_id: ID of the first user
+            user2_id: ID of the second user
+            
+        Returns:
+            Tuple (blocker_id, blocked_id) if there's a block, None otherwise
+        """
+        return self.repo.who_blocked_whom(user1_id, user2_id)
+
     def login(self, username: str, password: str) -> UserRead | None:
         """
         Authenticate user login.

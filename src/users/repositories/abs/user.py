@@ -108,6 +108,20 @@ class AbstractUserRepository(ABC):
         pass
 
     @abstractmethod
+    def who_blocked_whom(self, user1_id: int, user2_id: int) -> tuple[int, int] | None:
+        """
+        Check who blocked whom between two users.
+        
+        Args:
+            user1_id: ID of the first user
+            user2_id: ID of the second user
+            
+        Returns:
+            Tuple (blocker_id, blocked_id) if there's a block, None otherwise
+        """
+        pass
+
+    @abstractmethod
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """
         Verify password against hash.

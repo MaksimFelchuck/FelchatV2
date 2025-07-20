@@ -237,9 +237,24 @@ def get_block_status(
         return {"error": "Not authenticated"}
     
     is_blocked = user_service.is_blocked(current_user.id, user_id)
+    
+    # Check who blocked whom
+    block_info = user_service.who_blocked_whom(current_user.id, user_id)
+    is_blocker = False
+    is_blocked_user = False
+    
+    if block_info:
+        blocker_id, blocked_id = block_info
+        is_blocker = (blocker_id == current_user.id)
+        is_blocked_user = (blocked_id == current_user.id)
+    
     user_logger.info(f"Block status check: user {current_user.id} -> user {user_id}: {is_blocked}")
     
-    return {"is_blocked": is_blocked}
+    return {
+        "is_blocked": is_blocked,
+        "is_blocker": is_blocker,
+        "is_blocked_user": is_blocked_user
+    }
 
 @router.get("/users/current")
 def get_current_user_info(

@@ -678,37 +678,37 @@ class ModernChat {
         }
     }
     
-    updateBlockButton(userId, isBlocked) {
-        console.log('updateBlockButton called with userId:', userId, 'isBlocked:', isBlocked);
-        
+    updateBlockButton(userId, isBlocked, isBlocker = false, isBlockedUser = false) {
         const buttonContainer = document.querySelector('.chat-status');
-        console.log('Found button container:', buttonContainer);
         
         if (buttonContainer) {
             // Удаляем старую кнопку
             const existingButton = buttonContainer.querySelector('.block-btn, .unblock-btn');
             if (existingButton) {
-                console.log('Removing existing button');
                 existingButton.remove();
             }
             
-            // Создаем новую кнопку
-            const newButton = document.createElement('button');
-            newButton.className = isBlocked ? 'status-badge unblock-btn' : 'status-badge block-btn';
-            newButton.setAttribute('data-user-id', userId);
-            newButton.onclick = isBlocked ? () => this.unblockUserFromButton(newButton) : () => this.blockUserFromButton(newButton);
-            newButton.innerHTML = isBlocked ? 
-                '<i class="fas fa-unlock"></i> РАЗБЛОКИРОВАТЬ' : 
-                '<i class="fas fa-ban"></i> ЗАБЛОКИРОВАТЬ';
-            
-            buttonContainer.appendChild(newButton);
-            console.log('Added new button:', newButton.innerHTML);
+            // Создаем новую кнопку только если пользователь является блокером
+            if (isBlocked && isBlocker) {
+                const newButton = document.createElement('button');
+                newButton.className = 'status-badge unblock-btn';
+                newButton.setAttribute('data-user-id', userId);
+                newButton.onclick = () => this.unblockUserFromButton(newButton);
+                newButton.innerHTML = '<i class="fas fa-unlock"></i> РАЗБЛОКИРОВАТЬ';
+                
+                buttonContainer.appendChild(newButton);
+            } else if (!isBlocked) {
+                const newButton = document.createElement('button');
+                newButton.className = 'status-badge block-btn';
+                newButton.setAttribute('data-user-id', userId);
+                newButton.onclick = () => this.blockUserFromButton(newButton);
+                newButton.innerHTML = '<i class="fas fa-ban"></i> ЗАБЛОКИРОВАТЬ';
+                
+                buttonContainer.appendChild(newButton);
+            }
             
             // Обновляем форму ввода
-            console.log('Calling updateChatInput with isBlocked:', isBlocked);
             this.updateChatInput(isBlocked);
-        } else {
-            console.error('Button container not found!');
         }
     }
     
@@ -733,8 +733,6 @@ class ModernChat {
                 statusElement.textContent = 'ПОДКЛЮЧЕНИЕ...';
                 break;
         }
-        
-        console.log('Connection status updated:', status);
     }
     
     scrollToBottom() {
@@ -856,80 +854,57 @@ class ModernChat {
     }
     
     async initializeBlockUI() {
-        console.log('=== initializeBlockUI called ===');
-        
         // Get current chat user from URL
         const urlParams = new URLSearchParams(window.location.search);
         const currentChatUserId = urlParams.get('user');
         
         if (!currentChatUserId) {
-            console.log('No chat user in URL, skipping block UI initialization');
             return;
         }
-        
-        console.log('Initializing block UI for user:', currentChatUserId);
-        console.log('Current URL:', window.location.href);
         
         try {
             // Fetch actual block status from server
             const url = `/users/block-status/${currentChatUserId}`;
-            console.log('Fetching block status from:', url);
-            
             const response = await fetch(url);
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
             
             if (response.ok) {
                 const data = await response.json();
-                console.log('Response data:', data);
                 const isBlocked = data.is_blocked;
-                console.log('Block status from server:', isBlocked);
+                const isBlocker = data.is_blocker;
+                const isBlockedUser = data.is_blocked_user;
                 
                 // Update UI based on actual server status
-                this.updateBlockButton(currentChatUserId, isBlocked);
+                this.updateBlockButton(currentChatUserId, isBlocked, isBlocker, isBlockedUser);
             } else {
-                console.error('Failed to fetch block status:', response.status);
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
                 // Fallback to checking existing UI elements
                 this.initializeBlockUIFallback(currentChatUserId);
             }
         } catch (error) {
-            console.error('Error fetching block status:', error);
-            console.error('Error details:', error.message);
             // Fallback to checking existing UI elements
             this.initializeBlockUIFallback(currentChatUserId);
         }
     }
     
     initializeBlockUIFallback(userId) {
-        console.log('Using fallback block UI initialization for user:', userId);
-        
         // Check if user is blocked by looking at the existing button
         const blockButton = document.querySelector('.block-btn');
         const unblockButton = document.querySelector('.unblock-btn');
         
         if (blockButton) {
-            console.log('Found block button, user is not blocked');
-            this.updateBlockButton(userId, false);
+            this.updateBlockButton(userId, false, false, false);
         } else if (unblockButton) {
-            console.log('Found unblock button, user is blocked');
-            this.updateBlockButton(userId, true);
+            // In fallback mode, we can't determine who blocked whom, so we assume current user is blocker
+            this.updateBlockButton(userId, true, true, false);
         } else {
-            console.log('No block/unblock button found, assuming user is not blocked');
-            this.updateBlockButton(userId, false);
+            this.updateBlockButton(userId, false, false, false);
         }
     }
     
     updateChatInput(isBlocked) {
-        console.log('updateChatInput called with isBlocked:', isBlocked);
-        
         const chatInput = document.querySelector('.chat-input');
-        console.log('Found chat input element:', chatInput);
         
         if (chatInput) {
             if (isBlocked) {
-                console.log('Setting blocked input');
                 chatInput.innerHTML = `
                     <div class="blocked-input" style="background: rgba(220, 53, 69, 0.1); border: 1px solid #dc3545; border-radius: 8px; padding: 1rem; text-align: center; color: #dc3545;">
                         <i class="fas fa-ban" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
@@ -938,7 +913,6 @@ class ModernChat {
                     </div>
                 `;
             } else {
-                console.log('Setting normal input');
                 chatInput.innerHTML = `
                     <div class="input-group">
                         <textarea 
@@ -957,10 +931,6 @@ class ModernChat {
                 setTimeout(() => {
                     const messageInput = document.getElementById('message-input');
                     const sendBtn = document.getElementById('send-btn');
-                    
-                    console.log('Re-setting up event listeners');
-                    console.log('Found message input:', messageInput);
-                    console.log('Found send button:', sendBtn);
                     
                     if (messageInput) {
                         messageInput.addEventListener('keydown', (e) => {
@@ -983,14 +953,11 @@ class ModernChat {
                     }
                 }, 100);
             }
-        } else {
-            console.error('Chat input element not found!');
         }
     }
     
     blockUserFromButton(button) {
         const userId = button.getAttribute('data-user-id');
-        console.log('Blocking user from button:', userId);
         
         if (!userId) {
             this.showNotification('Ошибка: не удалось определить пользователя', 'danger');
@@ -1006,7 +973,7 @@ class ModernChat {
         }).then(response => {
             if (response.ok) {
                 // Обновляем кнопку без перезагрузки страницы
-                this.updateBlockButton(userId, true);
+                this.updateBlockButton(userId, true, true, false);
                 this.updateChatInput(true);
                 // Показываем уведомление
                 this.showNotification('Пользователь заблокирован', 'success');
@@ -1021,7 +988,6 @@ class ModernChat {
     
     unblockUserFromButton(button) {
         const userId = button.getAttribute('data-user-id');
-        console.log('Unblocking user from button:', userId);
         
         if (!userId) {
             this.showNotification('Ошибка: не удалось определить пользователя', 'danger');
@@ -1037,7 +1003,7 @@ class ModernChat {
         }).then(response => {
             if (response.ok) {
                 // Обновляем кнопку без перезагрузки страницы
-                this.updateBlockButton(userId, false);
+                this.updateBlockButton(userId, false, false, false);
                 this.updateChatInput(false);
                 // Показываем уведомление
                 this.showNotification('Пользователь разблокирован', 'success');
@@ -1058,14 +1024,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set current user from template data
     const currentUserElement = document.getElementById('current-user-data');
     const currentUserId = currentUserElement?.dataset?.userId;
-    console.log('Current user element:', currentUserElement);
-    console.log('Raw currentUserId from data attribute:', currentUserId);
     
     if (currentUserId) {
         chat.currentUser = parseInt(currentUserId);
-        console.log('Current user set from template:', chat.currentUser);
     } else {
-        console.error('Current user ID not found in template!');
         // Try to get from URL or other sources
         const urlParams = new URLSearchParams(window.location.search);
         const userFromUrl = urlParams.get('user');

@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>{% block title %}Felchat{% endblock %}</title>
     
     <!-- Fonts -->
@@ -14,8 +17,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="/static/css/main.css" rel="stylesheet">
-    <link href="/static/css/animations.css" rel="stylesheet">
+    <link href="/static/css/main.css?v=5" rel="stylesheet">
+    <link href="/static/css/animations.css?v=4" rel="stylesheet">
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -65,19 +68,43 @@
     </footer>
 
     <!-- Custom JavaScript -->
-    <script src="/static/js/chat.js?v=2"></script>
+    <script src="/static/js/chat.js?v=5"></script>
     
     <!-- Load current user info -->
     <script>
+        // Force cache refresh
+        if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+            window.location.reload();
+        }
+        
         // Load current user information
         async function loadCurrentUser() {
             try {
                 const response = await fetch('/users/current');
                 if (response.ok) {
                     const userData = await response.json();
+                    
+                    // Update header username
                     const placeholder = document.getElementById('username-placeholder');
                     if (placeholder) {
                         placeholder.textContent = userData.username;
+                    }
+                    
+                    // Update user panel if it exists
+                    const userAvatar = document.getElementById('current-user-avatar');
+                    const userName = document.getElementById('current-user-name');
+                    const userEmail = document.getElementById('current-user-email');
+                    
+                    if (userAvatar) {
+                        userAvatar.textContent = userData.username ? userData.username[0].toUpperCase() : 'U';
+                    }
+                    
+                    if (userName) {
+                        userName.textContent = userData.username || 'Пользователь';
+                    }
+                    
+                    if (userEmail) {
+                        userEmail.textContent = userData.email || '';
                     }
                 }
             } catch (error) {
